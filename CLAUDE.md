@@ -50,7 +50,6 @@ System must support:
 - `interface` for API response shapes; `type` for props, unions, and computed types
 - Zod schema is the single source of validation truth on the backend — no ad-hoc `if` checks on request fields
 - All API responses must follow the envelope in `docs/api-contract.md` — no bare returns
-- Prisma Client is instantiated once in `backend/src/db/prisma.ts` — never instantiate elsewhere
 - Scheduling logic lives exclusively in `backend/src/services/scheduling.service.ts` — no scheduling calculations in routes or controllers
 - `schema.prisma` is the single source of truth for all data shapes — do not duplicate DB types manually
 
