@@ -4,17 +4,18 @@ import { Icon } from '../components/ui/Icon';
 import { OrderSearchBar } from '../components/orders/OrderSearchBar';
 import { OrderTable } from '../components/orders/OrderTable';
 import { CreateOrderModal } from '../components/orders/CreateOrderModal';
+import { useToast } from '../contexts/ToastContext';
 import type { CreateOrderDto, Order } from '../types/order';
 
 type OrdersPageProps = {
   orders: Order[];
   onCreate: (dto: CreateOrderDto) => void;
-  pushToast: (message: string) => void;
 };
 
-export const OrdersPage = ({ orders, onCreate, pushToast }: OrdersPageProps) => {
+export const OrdersPage = ({ orders, onCreate }: OrdersPageProps) => {
   const [query, setQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const { pushToast } = useToast();
 
   const filtered = orders.filter((o) => {
     const q = query.trim().toLowerCase();

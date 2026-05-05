@@ -4,16 +4,17 @@ import { Icon } from '../components/ui/Icon';
 import { SupplyStatsGrid } from '../components/supplies/SupplyStatsGrid';
 import { SupplyTable } from '../components/supplies/SupplyTable';
 import { CreateSupplyModal } from '../components/supplies/CreateSupplyModal';
+import { useToast } from '../contexts/ToastContext';
 import type { CreateSupplyDto, Supply } from '../types/supply';
 
 type SuppliesPageProps = {
   supplies: Supply[];
   onCreate: (dto: CreateSupplyDto) => void;
-  pushToast: (message: string) => void;
 };
 
-export const SuppliesPage = ({ supplies, onCreate, pushToast }: SuppliesPageProps) => {
+export const SuppliesPage = ({ supplies, onCreate }: SuppliesPageProps) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const { pushToast } = useToast();
 
   const handleCreate = (dto: CreateSupplyDto) => {
     onCreate(dto);
