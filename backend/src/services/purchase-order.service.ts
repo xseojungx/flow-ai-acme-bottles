@@ -1,7 +1,7 @@
 import { purchaseOrderRepository } from "../repositories/purchase-order.repository";
 import { AppError } from "../types/app-error";
 import type { CreatePurchaseOrderInput, UpdatePurchaseOrderStatusInput } from "../dtos/purchase-order.dto";
-import type { OrderStatus } from "../generated/prisma";
+import type { OrderStatus } from "../generated/prisma/enums.js";
 
 const VALID_TRANSITIONS: Partial<Record<OrderStatus, OrderStatus>> = {
   PENDING: "IN_PRODUCTION",

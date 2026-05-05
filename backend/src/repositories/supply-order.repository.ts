@@ -7,8 +7,8 @@ export const supplyOrderRepository = {
       data: {
         material_type: data.material_type,
         quantity: data.quantity,
-        supplier_name: data.supplier_name,
-        tracking_number: data.tracking_number,
+        supplier_name: data.supplier_name ?? null,
+        tracking_number: data.tracking_number ?? null,
         expected_arrival_at: new Date(data.expected_arrival_at),
       },
     });

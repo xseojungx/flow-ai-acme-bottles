@@ -25,7 +25,7 @@ export const purchaseOrderController = {
     }
   },
 
-  async updateStatus(req: Request, res: Response, next: NextFunction) {
+  async updateStatus(req: Request<{ id: string }>, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const input = UpdatePurchaseOrderStatusSchema.parse(req.body);

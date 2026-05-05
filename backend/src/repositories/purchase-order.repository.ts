@@ -1,10 +1,17 @@
 import { prisma } from "../db.config";
-import type { OrderStatus } from "../generated/prisma";
+import type { OrderStatus } from "../generated/prisma/enums.js";
 import type { CreatePurchaseOrderInput } from "../dtos/purchase-order.dto";
 
 export const purchaseOrderRepository = {
   create(data: CreatePurchaseOrderInput) {
-    return prisma.purchaseOrder.create({ data });
+    return prisma.purchaseOrder.create({
+      data: {
+        customer_name: data.customer_name,
+        product_type: data.product_type,
+        quantity: data.quantity,
+        notes: data.notes ?? null,
+      },
+    });
   },
 
   findAll() {
