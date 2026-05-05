@@ -170,6 +170,111 @@ benefit at this scale.
 
 ---
 
+## AI Tools and Prompting
+
+This project was developed with **Claude Code** (Anthropic's CLI for Claude) as the primary AI coding assistant.
+
+### Prompt Files
+
+The following files were written before development began and loaded as persistent context to keep Claude's output consistent across the entire session.
+
+---
+
+**`CLAUDE.md`** — top-level instructions loaded automatically by Claude Code on every session.
+
+Defined the mission (working system over production-grade architecture), the priority order (clarification → correct CRUD → layer separation → business logic), the full tech stack, hard coding rules (no `any`, named exports only, no `useEffect` for fetching, Zod as the single validation source, etc.), and the conditions under which Claude must stop and ask rather than proceed.
+
+---
+
+**`docs/requirements.md`** — the product requirements spec.
+
+Captured the exact feature set (purchase orders, supply orders, production status), the two product types (L1 / G1), the two independent production lines and their capacities (2,000 / 1,500 bottles per hour), the three raw materials (PET, PTA, EG) and their per-unit gram requirements, the supply model (ORDERED / RECEIVED derived at runtime), and the explicit non-goals (no auth, no pricing, no inventory table, no concurrency handling).
+
+---
+
+**`docs/logic.md`** — the backend design specification.
+
+Documented the confirmed database schema (two tables, no computed columns), all runtime-derived values, the step-by-step FIFO scheduling algorithm (how `material_ready_at`, `start_at`, `eta`, and `fulfillment_status` are computed in a single pass over all orders), the three fulfillment statuses (ON_TIME / DELAYED / UNABLE_TO_FULFILL) and their conditions, order status transition rules (PENDING → IN_PRODUCTION → COMPLETED), and key implementation warnings (no pre-deduction outside the loop, COMPLETED orders must still run through the loop for material accounting).
+
+---
+
+**`docs/api-contract.md`** — the API contract.
+
+Defined the standard response envelope (`{ message, data }` for single objects; `{ message, data: { items, total } }` for lists), all request/response shapes for the seven endpoints (POST and GET supply orders, supply summary, POST / GET / PATCH purchase orders, GET production status), shared enum types, `days_late` semantics, and the HTTP error reference.
+
+---
+
+**`docs/patterns/backend.md`** — backend code patterns.
+
+Specified the folder structure (`routes/`, `controllers/`, `services/`, `repositories/`, `dtos/`), layer responsibilities and forbidden cross-layer calls, Zod validation placement (controller boundary only), error handling flow (`next(error)` → centralized middleware), and response shape conventions.
+
+---
+
+**`docs/patterns/frontend.md`** — frontend code patterns.
+
+Specified the folder structure, the mandatory three-state data-fetching pattern (loading / error / data), one-file-per-hook conventions for TanStack Query (`useGet<Entity>` / `usePost<Entity>`), the Axios instance setup, the `API_DOMAINS` and `QUERY_KEYS` constants pattern, the local-state form pattern (no form library), a component internal order rule (hooks → derived values → return), an accessibility checklist (ARIA labels, keyboard navigation, focus management), and the 120-line component split threshold.
+
+---
+
+**`.claude/settings.json`** — permission configuration for Claude Code.
+
+Restricted Claude from reading sensitive files (`.env*`, `*.pem`, `*.key`, `secrets/`, `.aws/`, `.ssh/`, etc.) during the session to prevent accidental exposure of credentials.
+
+---
+
+### Prompt that I used
+
+---
+
+I'm designing the FIFO scheduling algorithm for a production system before writing any code.
+Your job is to find flaws in my design — not implement it.
+
+Read @docs/logic.md in full before responding. That document is the single source of truth  
+ for this system's confirmed decisions. Do not reference anything outside it.
+
+---
+
+## What I want you to verify
+
+- whether my logic is correct and complete
+- any edge cases I haven't handled
+- any step that could produce a wrong result under valid inputs
+
+### 1. Inventory initialization
+
+I derive available inventory by summing all supply_orders where expected_arrival_at <= NOW().
+
+- Is this the right boundary condition (< vs <=)?
+- Are there cases where this produces a wrong initial value?
+
+### 2. FIFO loop ordering
+
+I sort all purchase orders by created_at ASC, regardless of status.
+
+- Is there a case where this ordering produces incorrect results?
+- What happens if two orders share the exact same created_at?
+
+### 3. Incoming supply consumption
+
+I consume from incoming_supplies in ascending expected_arrival_at order until the deficit is covered.
+
+- If two incoming supply records for the same material have the same expected_arrival_at,  
+  does the order matter?
+- Can a single incoming supply record be partially consumed, or is it all-or-nothing?
+
+---
+
+## Rules for your response
+
+- Do NOT implement any code yet.
+- Do NOT suggest improvements to the spec — only identify what is wrong or missing.
+- If any part of the design is ambiguous and you cannot determine correctness without
+  making an assumption, stop and ask me. Do not guess.
+- If a section is correct, say so in one line and move on.
+- Flag the most critical flaw first.
+
+---
+
 ## Given More Time
 
 ### Frontend
