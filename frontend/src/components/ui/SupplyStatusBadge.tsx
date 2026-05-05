@@ -1,17 +1,17 @@
-import type { SupplyStatus } from '../../types/supply';
+import type { SupplyStatus } from "../../types/supply";
 
 type SupplyStatusBadgeProps = {
   status: SupplyStatus;
 };
 
 const BADGE_STYLES: Record<SupplyStatus, string> = {
-  Ordered: 'bg-sky-100 text-sky-700',
-  Received: 'bg-success text-success',
+  Ordered: "bg-sky-100 text-sky-700",
+  Received: "bg-success text-success",
 };
 
 const DOT_STYLES: Record<SupplyStatus, string> = {
-  Ordered: 'bg-sky-600',
-  Received: 'bg-[var(--color-success)]',
+  Ordered: "bg-sky-600",
+  Received: "bg-[var(--color-success)]",
 };
 
 export const SupplyStatusBadge = ({ status }: SupplyStatusBadgeProps) => (
