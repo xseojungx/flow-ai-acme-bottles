@@ -9,6 +9,7 @@ type ProductionCardProps = {
 
 export const ProductionCard = ({ order }: ProductionCardProps) => {
   const od = overdueDays(order.eta);
+  const isSupplyDelayed = (order.daysLate ?? 0) > 0;
 
   return (
     <div className="bg-surface border border-base rounded-md p-4 px-[18px] flex gap-3.5 shadow-card hover:border-slate-300 transition-colors">
@@ -29,6 +30,11 @@ export const ProductionCard = ({ order }: ProductionCardProps) => {
           {od > 0 && (
             <span className="bg-danger text-danger text-[11.5px] font-semibold px-2 py-0.5 rounded-full">
               {od}d overdue
+            </span>
+          )}
+          {od === 0 && isSupplyDelayed && (
+            <span className="bg-danger text-danger text-[11.5px] font-semibold px-2 py-0.5 rounded-full">
+              {order.daysLate}d late
             </span>
           )}
         </div>

@@ -189,7 +189,8 @@ List all purchase orders, newest first. Includes runtime-calculated scheduling f
         "material_ready_at": "2025-05-05T12:00:00.000Z",
         "start_at": "2025-05-05T12:00:00.000Z",
         "eta": "2025-05-05T12:30:00.000Z",
-        "fulfillment_status": "ON_TIME"
+        "fulfillment_status": "ON_TIME",
+        "days_late": null
       }
     ],
     "total": 1
@@ -197,8 +198,9 @@ List all purchase orders, newest first. Includes runtime-calculated scheduling f
 }
 ```
 
-> `material_ready_at`, `start_at`, `eta`, `fulfillment_status` are **runtime-derived** on every read.
+> `material_ready_at`, `start_at`, `eta`, `fulfillment_status`, `days_late` are **runtime-derived** on every read.
 > For `UNABLE_TO_FULFILL` orders, `material_ready_at`/`start_at`/`eta` are not meaningful — use `fulfillment_status` to identify them.
+> `days_late` is `null` for `ON_TIME` and `UNABLE_TO_FULFILL` orders. For `DELAYED` orders it is the number of days the ETA is pushed back relative to what it would be if all supply were available immediately.
 
 ---
 
@@ -272,7 +274,8 @@ Returns the current production state for each line. All fields are runtime-calcu
         "material_ready_at": "2025-05-05T08:00:00.000Z",
         "start_at": "2025-05-05T08:00:00.000Z",
         "eta": "2025-05-05T09:00:00.000Z",
-        "fulfillment_status": "ON_TIME"
+        "fulfillment_status": "ON_TIME",
+        "days_late": null
       },
       "queue": [
         {
@@ -287,7 +290,8 @@ Returns the current production state for each line. All fields are runtime-calcu
           "material_ready_at": "2025-05-05T09:00:00.000Z",
           "start_at": "2025-05-05T09:00:00.000Z",
           "eta": "2025-05-05T11:00:00.000Z",
-          "fulfillment_status": "ON_TIME"
+          "fulfillment_status": "ON_TIME",
+          "days_late": null
         }
       ]
     },
@@ -308,6 +312,7 @@ Returns the current production state for each line. All fields are runtime-calcu
 | `fulfillment_status` | `ON_TIME` — sufficient stock now · `DELAYED` — waiting on incoming supply · `UNABLE_TO_FULFILL` — no supply path exists |
 | `start_at`           | When this order will begin production (accounts for line queue and material wait)                                       |
 | `eta`                | When this order will finish production                                                                                  |
+| `days_late`          | `DELAYED` only — how many days the ETA is pushed back vs. if supply were available now; `null` otherwise               |
 
 > `COMPLETED` orders are excluded from this response entirely.
 > `UNABLE_TO_FULFILL` orders appear in `queue` — identify them by `fulfillment_status`.

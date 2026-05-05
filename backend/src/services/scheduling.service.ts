@@ -14,6 +14,7 @@ export type ScheduledOrder = PurchaseOrderRow & {
   start_at: Date;
   eta: Date;
   fulfillment_status: FulfillmentStatus;
+  days_late: number | null;
 };
 
 const CAPACITY: Record<ProductType, number> = { L1: 2000, G1: 1500 };
@@ -128,6 +129,7 @@ export const schedulingService = {
     }
 
     const lineBusyUntil = { L1: now, G1: now };
+    const idealLineBusyUntil = { L1: now, G1: now };
     const result: ScheduledOrder[] = [];
 
     for (const order of allOrders) {
@@ -173,6 +175,7 @@ export const schedulingService = {
             start_at: now,
             eta: now,
             fulfillment_status: "UNABLE_TO_FULFILL",
+            days_late: null,
           });
           continue;
         }
@@ -196,7 +199,18 @@ export const schedulingService = {
 
       setLineBusy(lineBusyUntil, order.product_type, eta);
 
-      result.push({ ...order, material_ready_at, start_at, eta, fulfillment_status });
+      // Compute ideal ETA (material always ready at `now`) to derive days_late.
+      const idealLineBusy = getLineBusy(idealLineBusyUntil, order.product_type);
+      const idealStart = idealLineBusy > now ? idealLineBusy : now;
+      const idealEta = new Date(idealStart.getTime() + durationMs);
+      setLineBusy(idealLineBusyUntil, order.product_type, idealEta);
+
+      const days_late =
+        fulfillment_status === "DELAYED"
+          ? Math.max(0, Math.ceil((eta.getTime() - idealEta.getTime()) / (24 * 60 * 60 * 1000)))
+          : null;
+
+      result.push({ ...order, material_ready_at, start_at, eta, fulfillment_status, days_late });
     }
 
     return result;

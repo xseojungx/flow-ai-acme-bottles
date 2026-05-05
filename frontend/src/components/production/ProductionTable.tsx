@@ -30,7 +30,9 @@ export const ProductionTable = ({ orders }: ProductionTableProps) => (
         <tbody>
           {orders.map((o, i) => {
             const od = overdueDays(o.eta);
-            const etaLate = od > 0 && o.status === 'In Production';
+            const isOverdue = od > 0 && o.status === 'In Production';
+            const isSupplyDelayed = (o.daysLate ?? 0) > 0;
+            const etaHighlight = isOverdue || isSupplyDelayed;
             return (
               <tr key={o.id} className="border-b border-soft last:border-0 hover:bg-slate-50/60">
                 <td className="px-4 py-3.5 text-muted">{i + 1}</td>
@@ -54,10 +56,13 @@ export const ProductionTable = ({ orders }: ProductionTableProps) => (
                 </td>
                 <td className="px-4 py-3.5">
                   {o.eta ? (
-                    <span className={etaLate ? 'text-danger font-semibold' : 'text-muted'}>
+                    <span className={etaHighlight ? 'text-danger font-semibold' : 'text-muted'}>
                       {fmtDate(o.eta, { short: true })}
-                      {etaLate && (
+                      {isOverdue && (
                         <span className="font-medium text-xs"> ({od}d late)</span>
+                      )}
+                      {!isOverdue && isSupplyDelayed && (
+                        <span className="font-medium text-xs"> ({o.daysLate}d late)</span>
                       )}
                     </span>
                   ) : (

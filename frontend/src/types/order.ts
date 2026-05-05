@@ -15,6 +15,7 @@ export interface ApiOrder {
   start_at?: string;
   eta?: string;
   fulfillment_status?: 'ON_TIME' | 'DELAYED' | 'UNABLE_TO_FULFILL';
+  days_late?: number | null;
 }
 
 export type CreateOrderApiDto = {
@@ -38,6 +39,7 @@ export interface Order {
   orderDate: string;
   expectedStart: string | null;
   eta: string | null;
+  daysLate: number | null;
   status: OrderStatus;
   notes: string | null;
 }
@@ -93,6 +95,7 @@ export const mapApiOrder = (api: ApiOrder): Order => {
         ? 'Started'
         : (api.start_at?.slice(0, 10) ?? null),
     eta: api.eta?.slice(0, 10) ?? null,
+    daysLate: api.days_late ?? null,
     status: ORDER_STATUS_MAP[api.status],
     notes: api.notes,
   };
