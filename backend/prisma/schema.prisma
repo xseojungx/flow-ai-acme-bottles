@@ -1,13 +1,49 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
+}
+
+enum MaterialType {
+  PET
+  PTA
+  EG
+}
+
+enum ProductType {
+  L1 
+  G1 
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PRODUCTION
+  COMPLETED
+}
+
+model SupplyOrder {
+  id                   String       @id @default(uuid())
+  material_type        MaterialType
+  quantity             Int
+  supplier_name        String?
+  tracking_number      String?
+  expected_arrival_at  DateTime
+  created_at           DateTime     @default(now())
+
+  @@map("supply_orders")
+}
+
+model PurchaseOrder {
+  id            String      @id @default(uuid())
+  customer_name String
+  product_type  ProductType
+  quantity      Int
+  status        OrderStatus @default(PENDING)
+  notes         String?     @db.Text
+  created_at    DateTime    @default(now())
+  completed_at  DateTime?
+
+  @@map("purchase_orders")
 }
