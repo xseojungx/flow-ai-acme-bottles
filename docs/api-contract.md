@@ -130,7 +130,7 @@ List all supply orders, newest first.
 
 ### `GET /api/supply-orders/summary`
 
-현재 수령된 재료 수량과 완료된 구매 주문이 소비한 수량, 잔여 가용 수량을 반환한다.
+Returns the total received material quantities, the amount consumed by COMPLETED purchase orders, and the remaining available stock.
 
 **Response `200`**
 
@@ -145,9 +145,9 @@ List all supply orders, newest first.
 }
 ```
 
-> 모든 수치는 그램(g) 단위.  
-> `consumed` = `expected_arrival_at ≤ NOW`인 공급 주문 기준, COMPLETED 구매 주문이 소비한 재료량.  
-> `available = received − consumed` (최소 0).
+> All quantities are in grams (g).  
+> `consumed` — total material used by all COMPLETED purchase orders, against received supply (`expected_arrival_at ≤ NOW`).  
+> `available = received − consumed` (minimum 0).
 
 ---
 
