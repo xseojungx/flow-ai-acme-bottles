@@ -1,5 +1,8 @@
 import type { Request, Response, NextFunction } from "express";
-import { CreatePurchaseOrderSchema, UpdatePurchaseOrderStatusSchema } from "../dtos/purchase-order.dto";
+import {
+  CreatePurchaseOrderSchema,
+  UpdatePurchaseOrderStatusSchema,
+} from "../dtos/purchase-order.dto";
 import { purchaseOrderService } from "../services/purchase-order.service";
 
 export const purchaseOrderController = {
@@ -25,7 +28,11 @@ export const purchaseOrderController = {
     }
   },
 
-  async updateStatus(req: Request<{ id: string }>, res: Response, next: NextFunction) {
+  async updateStatus(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) {
     try {
       const { id } = req.params;
       const input = UpdatePurchaseOrderStatusSchema.parse(req.body);

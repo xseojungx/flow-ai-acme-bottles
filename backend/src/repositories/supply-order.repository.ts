@@ -19,4 +19,17 @@ export const supplyOrderRepository = {
       orderBy: { created_at: "desc" },
     });
   },
+
+  findReceived() {
+    return prisma.supplyOrder.findMany({
+      where: { expected_arrival_at: { lte: new Date() } },
+    });
+  },
+
+  findIncoming() {
+    return prisma.supplyOrder.findMany({
+      where: { expected_arrival_at: { gt: new Date() } },
+      orderBy: { expected_arrival_at: "asc" },
+    });
+  },
 };

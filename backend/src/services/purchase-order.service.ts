@@ -1,4 +1,5 @@
 import { purchaseOrderRepository } from "../repositories/purchase-order.repository";
+import { schedulingService } from "./scheduling.service";
 import { AppError } from "../types/app-error";
 import type { CreatePurchaseOrderInput, UpdatePurchaseOrderStatusInput } from "../dtos/purchase-order.dto";
 import type { OrderStatus } from "../generated/prisma/enums.js";
@@ -14,8 +15,10 @@ export const purchaseOrderService = {
   },
 
   async findAll() {
-    // TODO: enrich with ETA fields from scheduling.service once implemented (step 2)
-    return purchaseOrderRepository.findAll();
+    const scheduled = await schedulingService.computeSchedule();
+    return [...scheduled].sort(
+      (a, b) => b.created_at.getTime() - a.created_at.getTime(),
+    );
   },
 
   async updateStatus(id: string, input: UpdatePurchaseOrderStatusInput) {
