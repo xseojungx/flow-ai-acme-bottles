@@ -3,17 +3,30 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+// All dates are relative to today (TODAY = runtime date).
+// daysOffset(n) → TODAY + n days at UTC midnight; add utcHours/utcMinutes for time.
+const _todayUTC = (() => {
+  const n = new Date();
+  return new Date(Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate()));
+})();
+
+function daysOffset(days: number, utcHours = 0, utcMinutes = 0): Date {
+  return new Date(
+    _todayUTC.getTime() + days * 86_400_000 + utcHours * 3_600_000 + utcMinutes * 60_000,
+  );
+}
+
 // ─── Material requirements (g/bottle) ───
 // L1: PET=20 PTA=15 EG=10
 // G1: PET=65 PTA=45 EG=20
 //
 // ─── Supply design ─────────────────────
-// RECEIVED (arrived ≤ 2026-05-05):
+// RECEIVED (arrived before today):
 //   PET  900,000g — sufficient for all orders
 //   PTA  500,000g — sufficient for all orders
 //   EG   200,000g — insufficient (runs out after PENDING L1)
 //
-// ORDERED (arriving 2026-05-10):
+// ORDERED (arriving TODAY+4):
 //   EG   120,000g — covers the 60,000g EG deficit for PENDING G1 → DELAYED
 //
 // ─── FIFO trace ────────────────────────
@@ -39,21 +52,21 @@ async function main() {
         quantity: 900_000,
         supplier_name: "Acme Chemicals",
         tracking_number: "TRK-2026-001",
-        expected_arrival_at: new Date("2026-04-20T00:00:00.000Z"),
+        expected_arrival_at: daysOffset(-16), // TODAY-16
       },
       {
         material_type: "PTA",
         quantity: 500_000,
         supplier_name: "Global Polymers",
         tracking_number: "TRK-2026-002",
-        expected_arrival_at: new Date("2026-04-25T00:00:00.000Z"),
+        expected_arrival_at: daysOffset(-11), // TODAY-11
       },
       {
         material_type: "EG",
         quantity: 200_000,
         supplier_name: "ChemSource Inc.",
         tracking_number: "TRK-2026-003",
-        expected_arrival_at: new Date("2026-04-30T00:00:00.000Z"),
+        expected_arrival_at: daysOffset(-6), // TODAY-6
       },
       // Incoming supply — covers the EG shortfall for PENDING G1 order
       {
@@ -61,7 +74,7 @@ async function main() {
         quantity: 120_000,
         supplier_name: "ChemSource Inc.",
         tracking_number: "TRK-2026-004",
-        expected_arrival_at: new Date("2026-05-10T00:00:00.000Z"),
+        expected_arrival_at: daysOffset(4), // TODAY+4
       },
     ],
   });
@@ -76,8 +89,8 @@ async function main() {
         quantity: 2_000,
         status: "COMPLETED",
         notes: null,
-        created_at: new Date("2026-04-01T09:00:00.000Z"),
-        completed_at: new Date("2026-04-02T10:00:00.000Z"),
+        created_at: daysOffset(-35, 9), // TODAY-35
+        completed_at: daysOffset(-34, 10), // TODAY-34
       },
       {
         customer_name: "Lotte Beverage",
@@ -85,8 +98,8 @@ async function main() {
         quantity: 1_000,
         status: "COMPLETED",
         notes: null,
-        created_at: new Date("2026-04-05T09:00:00.000Z"),
-        completed_at: new Date("2026-04-07T09:40:00.000Z"),
+        created_at: daysOffset(-31, 9), // TODAY-31
+        completed_at: daysOffset(-29, 9, 40), // TODAY-29
       },
       {
         customer_name: "CJ Foods",
@@ -94,8 +107,8 @@ async function main() {
         quantity: 3_000,
         status: "COMPLETED",
         notes: null,
-        created_at: new Date("2026-04-10T09:00:00.000Z"),
-        completed_at: new Date("2026-04-11T10:30:00.000Z"),
+        created_at: daysOffset(-26, 9), // TODAY-26
+        completed_at: daysOffset(-25, 10, 30), // TODAY-25
       },
       // ── 1× IN_PRODUCTION per line ──────────────────────────────────────────
       {
@@ -104,7 +117,7 @@ async function main() {
         quantity: 5_000,
         status: "IN_PRODUCTION",
         notes: null,
-        created_at: new Date("2026-04-20T09:00:00.000Z"),
+        created_at: daysOffset(-16, 9), // TODAY-16
         completed_at: null,
       },
       {
@@ -113,7 +126,7 @@ async function main() {
         quantity: 2_000,
         status: "IN_PRODUCTION",
         notes: null,
-        created_at: new Date("2026-04-22T09:00:00.000Z"),
+        created_at: daysOffset(-14, 9), // TODAY-14
         completed_at: null,
       },
       // ── 2× PENDING ────────────────────────────────────────────────────────
@@ -124,17 +137,17 @@ async function main() {
         quantity: 4_000,
         status: "PENDING",
         notes: "Delivery requested by June 2026",
-        created_at: new Date("2026-05-01T09:00:00.000Z"),
+        created_at: daysOffset(-5, 9), // TODAY-5
         completed_at: null,
       },
-      // G1: DELAYED — EG runs out; covered by the 2026-05-10 incoming supply
+      // G1: DELAYED — EG runs out; covered by the TODAY+4 incoming supply
       {
         customer_name: "Evian Corp",
         product_type: "G1",
         quantity: 3_000,
         status: "PENDING",
         notes: null,
-        created_at: new Date("2026-05-03T09:00:00.000Z"),
+        created_at: daysOffset(-3, 9), // TODAY-3
         completed_at: null,
       },
     ],
