@@ -17,9 +17,9 @@ These apply to every pattern below:
 All three states are required. Missing any is a bug.
 
 ```tsx
-// features/<domain>/<Entity>List.tsx
-export function EntityList() {
-  const { data, isLoading, isError } = useEntities();
+// pages/<domain>/<Entity>List.tsx
+export const EntityList = () => {
+  const { data, isLoading, isError } = useGetEntities({ ... });
 
   if (isLoading) return <LoadingSpinner />;
   if (isError) return <ErrorMessage message="..." />;
@@ -32,68 +32,103 @@ export function EntityList() {
       ))}
     </ul>
   );
-}
+};
 ```
 
-**Query hook** — one file per domain:
+**Query hook** — one file per hook:
 
 ```ts
-// features/<domain>/hooks/use<Entity>.ts
-export function useEntities() {
-  return useQuery<EntityListResponse>({
-    queryKey: ["entities"],
-    queryFn: getEntities,
+// services/<domain>/query/useGet<Entity>.ts
+import { QUERY_KEYS } from "@/constants/api";
+import { useQuery } from "@tanstack/react-query";
+
+export const useGetEntities = ({ param }: { param: number }) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.ENTITY, param],
+    queryFn: () => getEntities({ param }),
   });
-}
+};
 ```
 
-**Mutation hook:**
+**Mutation hook** — one file per hook:
 
 ```ts
-// features/<domain>/hooks/useCreate<Entity>.ts
-export function useCreateEntity() {
+// services/<domain>/mutation/usePost<Entity>.ts
+import { QUERY_KEYS } from "@/constants/api";
+import { useHandleReactQueryError } from "@/hooks/useHandleError";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+export const usePostEntity = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createEntity,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["entities"] }),
+    mutationFn: (data: EntityDto) => postEntity(data),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ENTITY] }),
+    onError: useHandleReactQueryError,
   });
-}
+};
 ```
 
 **Rules:**
 
-- `queryKey` matches the domain: `['purchase-orders']`, `['supplies']`, `['production-status']`
+- `queryKey` always uses `QUERY_KEYS` constants from `@/constants/api` — never inline strings
 - `invalidateQueries` only inside `onSuccess` — never elsewhere
-- API calls live in `src/api/<domain>.api.ts` — never inline `axios` in hooks
+- API calls live in `src/api/<domain>/handle<Entity>.api.ts` — never inline `instance` in hooks
 
 ---
 
 ## API Layer
 
 ```ts
-// api/<domain>.api.ts
-export async function getEntities(): Promise<EntityListResponse> {
-  const { data } = await apiClient.get("/entities");
-  return data.data; // unwrap envelope
-}
+// api/<domain>/handle<Entity>.api.ts
+import { instance } from "@/api/axiosInstance";
+import { generateApiPath } from "@/api/utils";
+import { API_DOMAINS } from "@/constants/api";
+import { ApiResponse } from "@/types/common/ApiResponse.types";
 
-export async function createEntity(dto: CreateEntityDto): Promise<void> {
-  await apiClient.post("/entities", dto);
-}
+export const getEntities = async ({
+  param,
+}: {
+  param: number;
+}): Promise<EntityType> => {
+  const response = await instance.get<ApiResponse<EntityType>>(
+    generateApiPath(API_DOMAINS.ENTITY, { param }),
+  );
+  return response.data.result;
+};
+
+export const postEntity = async (data: EntityDto): Promise<void> => {
+  await instance.post(API_DOMAINS.ENTITY, data);
+};
 ```
 
 ```ts
-// api/client.ts — instantiated once, never elsewhere
-export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001/api",
+// api/axiosInstance.ts — instantiated once, never elsewhere
+export const instance = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true,
 });
+setupInterceptors(instance);
+```
+
+```ts
+// constants/api.ts — URL and query key constants
+export const API_DOMAINS = {
+  ENTITY: "/entity/:param",
+};
+
+export const QUERY_KEYS = {
+  ENTITY: "entity",
+};
 ```
 
 **Rules:**
 
-- `apiClient` instantiated once in `api/client.ts` only
-- Every function unwraps the envelope (`data.data`) before returning
+- `instance` instantiated once in `api/axiosInstance.ts` only
+- Every function unwraps the envelope (`response.data.result`) before returning
 - Return types always explicit — no inferred `any` from axios
+- All API paths defined in `API_DOMAINS` or `SELLER_API_DOMAINS` in `constants/api.ts`
+- Dynamic path segments (`:paramName`) resolved with `generateApiPath()` from `@/api/utils`
 
 ---
 
@@ -102,24 +137,26 @@ export const apiClient = axios.create({
 Local `useState` only — no external form library.
 
 ```tsx
-// features/<domain>/components/Create<Entity>Modal.tsx
-type Create<Entity>ModalProps = { onClose: () => void };
+// pages/<domain>/components/Create<Entity>Modal.tsx
+type CreateEntityModalProps = { onClose: () => void };
 type FormState = { field: string };
 
 const INITIAL_STATE: FormState = { field: "" };
 
-export function CreateEntityModal({ onClose }: CreateEntityModalProps) {
+export const CreateEntityModal = ({ onClose }: CreateEntityModalProps) => {
   const [form, setForm] = useState<FormState>(INITIAL_STATE);
   const [error, setError] = useState<string | null>(null);
-  const { mutate, isPending } = useCreateEntity();
+  const { mutate, isPending } = usePostEntity();
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
-  ) {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }
+  };
 
-  function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     // validate → setError on failure, mutate on pass
@@ -127,7 +164,7 @@ export function CreateEntityModal({ onClose }: CreateEntityModalProps) {
       onSuccess: onClose,
       onError: () => setError("Failed. Please try again."),
     });
-  }
+  };
 
   return (
     <dialog open aria-modal="true" aria-labelledby="modal-title">
@@ -135,15 +172,22 @@ export function CreateEntityModal({ onClose }: CreateEntityModalProps) {
       {error && <p role="alert">{error}</p>}
       <form onSubmit={handleSubmit}>
         <label htmlFor="field">...</label>
-        <input id="field" name="field" value={form.field} onChange={handleChange} />
-        <button type="button" onClick={onClose}>Cancel</button>
+        <input
+          id="field"
+          name="field"
+          value={form.field}
+          onChange={handleChange}
+        />
+        <button type="button" onClick={onClose}>
+          Cancel
+        </button>
         <button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save"}
         </button>
       </form>
     </dialog>
   );
-}
+};
 ```
 
 **Rules:**
@@ -167,13 +211,13 @@ Apply to every interactive component before marking done:
 - [ ] Error messages: `role="alert"`
 - [ ] Loading indicators: `aria-busy="true"` or descriptive text
 
-**Keyboard navigation**
+**Keyboard Navigation**
 
 - [ ] Every action reachable by Tab
 - [ ] Enter / Space activates buttons and checkboxes
 - [ ] Escape closes modals and dropdowns
 
-**Focus management**
+**Focus Management**
 
 - [ ] Focus moves into a modal on open (`autoFocus` on first field, or `ref.current?.focus()`)
 - [ ] Focus returns to the trigger element on close
@@ -193,11 +237,11 @@ type ComponentNameProps = { ... };
 const CONSTANT = ...;
 
 // 3. Component function
-export function ComponentName({ prop }: ComponentNameProps) {
+export const ComponentName = ({ prop }: ComponentNameProps) => {
   // 4. Hooks — query → mutation → state → ref
   // 5. Derived values and handlers
   // 6. Return
-}
+};
 ```
 
 **When to split:**
@@ -213,8 +257,18 @@ export function ComponentName({ prop }: ComponentNameProps) {
 ```
 src/
 ├── pages/
-├── utils/
 ├── components/
+├── services/
+│   └── <domain>/
+│       ├── query/        # useGet<Entity>.ts — one hook per file
+│       └── mutation/     # usePost<Entity>.ts, usePatch<Entity>.ts, … — one hook per file
+├── api/
+│   ├── axiosInstance.ts
+│   └── <domain>/         # handle<Entity>.api.ts
+├── types/
+├── constants/
+│   └── api.ts            # API_DOMAINS, SELLER_API_DOMAINS, QUERY_KEYS
 ├── hooks/
-└── types/
+├── utils/
+└── routes/
 ```
