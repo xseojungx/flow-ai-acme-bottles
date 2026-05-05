@@ -69,6 +69,10 @@ backend at `http://localhost:3000`.
 
 ## Architecture & Design Decisions
 
+### Design
+
+I used Claude Design for UI/UX.
+
 ### Overall Structure
 
 The project is split into two independent apps:
@@ -172,7 +176,7 @@ benefit at this scale.
 
 ## AI Tools and Prompting
 
-This project was developed with **Claude Code** (Anthropic's CLI for Claude) as the primary AI coding assistant.
+This project was developed with **Claude Code** (claude-sonnet-4-6) as the primary AI coding assistant.
 
 ### Prompt Files
 
