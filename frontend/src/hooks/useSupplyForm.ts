@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import type { CreateSupplyDto, SupplyFormErrors, SupplyFormState } from '../types/supply';
+import { usePostSupply } from '@/services/supplies/mutation/usePostSupply';
+import { API_MATERIAL_TYPE } from '@/types/supply';
+import type { SupplyFormErrors, SupplyFormState } from '@/types/supply';
 
 const INITIAL_STATE: SupplyFormState = {
   material: 'PET Resin',
@@ -9,9 +11,11 @@ const INITIAL_STATE: SupplyFormState = {
   eta: '',
 };
 
-export const useSupplyForm = (onSuccess: (dto: CreateSupplyDto) => void) => {
+export const useSupplyForm = (onSuccess: () => void) => {
   const [form, setForm] = useState<SupplyFormState>(INITIAL_STATE);
   const [errors, setErrors] = useState<SupplyFormErrors>({});
+  const [apiError, setApiError] = useState<string | null>(null);
+  const { mutate, isPending } = usePostSupply();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -22,26 +26,33 @@ export const useSupplyForm = (onSuccess: (dto: CreateSupplyDto) => void) => {
   const reset = () => {
     setForm(INITIAL_STATE);
     setErrors({});
+    setApiError(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setApiError(null);
+
     const errs: SupplyFormErrors = {};
     if (!form.qty || Number(form.qty) <= 0) errs.qty = 'Enter a positive number';
+    if (!form.eta) errs.eta = 'Required';
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
-    onSuccess({
-      material: form.material,
-      qty: Number(form.qty),
-      supplier: form.supplier.trim() || '—',
-      tracking: form.tracking.trim() || '—',
-      orderDate: new Date().toISOString().slice(0, 10),
-      eta: form.eta || null,
-      status: 'Ordered',
-    });
-    reset();
+    mutate(
+      {
+        material_type: API_MATERIAL_TYPE[form.material],
+        quantity: Number(form.qty) * 1000,
+        supplier_name: form.supplier.trim() || undefined,
+        tracking_number: form.tracking.trim() || undefined,
+        expected_arrival_at: `${form.eta}T00:00:00.000Z`,
+      },
+      {
+        onSuccess: () => { onSuccess(); reset(); },
+        onError: () => setApiError('Failed to place supply order. Please try again.'),
+      },
+    );
   };
 
-  return { form, errors, handleChange, handleSubmit, reset };
+  return { form, errors, apiError, handleChange, handleSubmit, reset, isPending };
 };

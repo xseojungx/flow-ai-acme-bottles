@@ -4,9 +4,19 @@ import { supplyOrderRouter } from "./routes/supply-order.routes.js";
 import { purchaseOrderRouter } from "./routes/purchase-order.routes.js";
 import { productionRouter } from "./routes/production.routes.js";
 import dotenv from "dotenv";
+import cors from "cors";
+
+dotenv.config();
 
 export const app = express();
+app.use(express.static("public"));
 
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 app.use("/api/supply-orders", supplyOrderRouter);

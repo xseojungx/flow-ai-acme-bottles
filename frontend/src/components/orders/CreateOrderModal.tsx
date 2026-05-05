@@ -1,20 +1,21 @@
 import { Modal } from '../ui/Modal';
 import { Field } from '../ui/Field';
 import { Input } from '../ui/Input';
-import { useOrderForm } from '../../hooks/useOrderForm';
-import type { CreateOrderDto } from '../../types/order';
+import { useOrderForm } from '@/hooks/useOrderForm';
+import { useToast } from '@/contexts/ToastContext';
 
 type CreateOrderModalProps = {
   open: boolean;
   onClose: () => void;
-  onCreate: (dto: CreateOrderDto) => void;
 };
 
-export const CreateOrderModal = ({ open, onClose, onCreate }: CreateOrderModalProps) => {
-  const { form, errors, handleChange, handleSubmit, reset } = useOrderForm((dto) => {
-    onCreate(dto);
-    onClose();
-  });
+export const CreateOrderModal = ({ open, onClose }: CreateOrderModalProps) => {
+  const { pushToast } = useToast();
+  const { form, errors, apiError, handleChange, handleSubmit, reset, isPending } =
+    useOrderForm(() => {
+      pushToast('Purchase order created');
+      onClose();
+    });
 
   const handleClose = () => {
     reset();
@@ -30,6 +31,12 @@ export const CreateOrderModal = ({ open, onClose, onCreate }: CreateOrderModalPr
       width={480}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+        {apiError && (
+          <p role="alert" className="text-[13px] text-danger">
+            {apiError}
+          </p>
+        )}
+
         <Field label="Customer Name" htmlFor="customer" required error={errors.customer}>
           <Input
             id="customer"
@@ -76,15 +83,17 @@ export const CreateOrderModal = ({ open, onClose, onCreate }: CreateOrderModalPr
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2.5 rounded-md text-[13.5px] font-semibold bg-surface border border-base text-ink hover:bg-[var(--color-bg)] hover:border-slate-300 transition-colors"
+            disabled={isPending}
+            className="px-4 py-2.5 rounded-md text-[13.5px] font-semibold bg-surface border border-base text-ink hover:bg-[var(--color-bg)] hover:border-slate-300 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-md text-[13.5px] font-semibold bg-primary text-white hover:bg-[var(--color-primary-600)] shadow-[0_1px_2px_rgba(37,99,235,0.25)] transition-colors"
+            disabled={isPending}
+            className="px-4 py-2.5 rounded-md text-[13.5px] font-semibold bg-primary text-white hover:bg-[var(--color-primary-600)] shadow-[0_1px_2px_rgba(37,99,235,0.25)] transition-colors disabled:opacity-50"
           >
-            Create PO
+            {isPending ? 'Creating...' : 'Create PO'}
           </button>
         </div>
       </form>

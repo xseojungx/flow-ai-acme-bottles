@@ -4,22 +4,13 @@ import { Icon } from '../components/ui/Icon';
 import { SupplyStatsGrid } from '../components/supplies/SupplyStatsGrid';
 import { SupplyTable } from '../components/supplies/SupplyTable';
 import { CreateSupplyModal } from '../components/supplies/CreateSupplyModal';
-import { useToast } from '../contexts/ToastContext';
-import type { CreateSupplyDto, Supply } from '../types/supply';
+import { useGetSupplies } from '@/services/supplies/query/useGetSupplies';
 
-type SuppliesPageProps = {
-  supplies: Supply[];
-  onCreate: (dto: CreateSupplyDto) => void;
-};
-
-export const SuppliesPage = ({ supplies, onCreate }: SuppliesPageProps) => {
+export const SuppliesPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const { pushToast } = useToast();
+  const { data: supplies, isLoading, isError } = useGetSupplies();
 
-  const handleCreate = (dto: CreateSupplyDto) => {
-    onCreate(dto);
-    pushToast('Supply order placed');
-  };
+  const list = supplies ?? [];
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
@@ -40,20 +31,31 @@ export const SuppliesPage = ({ supplies, onCreate }: SuppliesPageProps) => {
           </button>
         </header>
 
-        <SupplyStatsGrid supplies={supplies} />
-
-        <div className="flex-between mb-2.5">
-          <div className="text-label">SUPPLY ORDERS</div>
-          <div className="text-[12.5px] text-muted">{supplies.length} orders</div>
-        </div>
-
-        <SupplyTable supplies={supplies} />
+        {isLoading && (
+          <div className="py-16 text-center text-muted text-[13px]" aria-busy="true">
+            Loading supplies…
+          </div>
+        )}
+        {isError && (
+          <div className="py-16 text-center text-danger text-[13px]">
+            Failed to load supplies. Please refresh.
+          </div>
+        )}
+        {!isLoading && !isError && (
+          <>
+            <SupplyStatsGrid supplies={list} />
+            <div className="flex-between mb-2.5">
+              <div className="text-label">SUPPLY ORDERS</div>
+              <div className="text-[12.5px] text-muted">{list.length} orders</div>
+            </div>
+            <SupplyTable supplies={list} />
+          </>
+        )}
       </div>
 
       <CreateSupplyModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onCreate={handleCreate}
       />
     </div>
   );

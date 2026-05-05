@@ -1,10 +1,7 @@
 import { useState } from 'react';
-import {
-  PRODUCT_MAP,
-  type CreateOrderDto,
-  type OrderFormErrors,
-  type OrderFormState,
-} from '../types/order';
+import { usePostOrder } from '@/services/orders/mutation/usePostOrder';
+import { API_PRODUCT_TYPE } from '@/types/order';
+import type { OrderFormErrors, OrderFormState } from '@/types/order';
 
 const INITIAL_STATE: OrderFormState = {
   customer: '',
@@ -13,9 +10,11 @@ const INITIAL_STATE: OrderFormState = {
   notes: '',
 };
 
-export const useOrderForm = (onSuccess: (dto: CreateOrderDto) => void) => {
+export const useOrderForm = (onSuccess: () => void) => {
   const [form, setForm] = useState<OrderFormState>(INITIAL_STATE);
   const [errors, setErrors] = useState<OrderFormErrors>({});
+  const [apiError, setApiError] = useState<string | null>(null);
+  const { mutate, isPending } = usePostOrder();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -26,29 +25,32 @@ export const useOrderForm = (onSuccess: (dto: CreateOrderDto) => void) => {
   const reset = () => {
     setForm(INITIAL_STATE);
     setErrors({});
+    setApiError(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setApiError(null);
+
     const errs: OrderFormErrors = {};
     if (!form.customer.trim()) errs.customer = 'Required';
     if (!form.qty || Number(form.qty) <= 0) errs.qty = 'Enter a positive number';
     setErrors(errs);
     if (Object.keys(errs).length) return;
 
-    onSuccess({
-      customer: form.customer.trim(),
-      product: PRODUCT_MAP[form.product],
-      productType: form.product,
-      qty: Number(form.qty),
-      orderDate: new Date().toISOString().slice(0, 10),
-      expectedStart: null,
-      eta: null,
-      status: 'Pending',
-      notes: form.notes.trim() || null,
-    });
-    reset();
+    mutate(
+      {
+        customer_name: form.customer.trim(),
+        product_type: API_PRODUCT_TYPE[form.product],
+        quantity: Number(form.qty),
+        notes: form.notes.trim() || undefined,
+      },
+      {
+        onSuccess: () => { onSuccess(); reset(); },
+        onError: () => setApiError('Failed to create order. Please try again.'),
+      },
+    );
   };
 
-  return { form, errors, handleChange, handleSubmit, reset };
+  return { form, errors, apiError, handleChange, handleSubmit, reset, isPending };
 };

@@ -4,29 +4,19 @@ import { Icon } from '../components/ui/Icon';
 import { OrderSearchBar } from '../components/orders/OrderSearchBar';
 import { OrderTable } from '../components/orders/OrderTable';
 import { CreateOrderModal } from '../components/orders/CreateOrderModal';
-import { useToast } from '../contexts/ToastContext';
-import type { CreateOrderDto, Order } from '../types/order';
+import { useGetOrders } from '@/services/orders/query/useGetOrders';
 
-type OrdersPageProps = {
-  orders: Order[];
-  onCreate: (dto: CreateOrderDto) => void;
-};
-
-export const OrdersPage = ({ orders, onCreate }: OrdersPageProps) => {
+export const OrdersPage = () => {
   const [query, setQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const { pushToast } = useToast();
+  const { data: orders, isLoading, isError } = useGetOrders();
 
-  const filtered = orders.filter((o) => {
+  const list = orders ?? [];
+  const filtered = list.filter((o) => {
     const q = query.trim().toLowerCase();
     if (!q) return true;
     return [o.po, o.customer, o.product].join(' ').toLowerCase().includes(q);
   });
-
-  const handleCreate = (dto: CreateOrderDto) => {
-    onCreate(dto);
-    pushToast('Purchase order created');
-  };
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
@@ -37,7 +27,7 @@ export const OrdersPage = ({ orders, onCreate }: OrdersPageProps) => {
             <h1 className="text-[26px] font-bold tracking-[-0.02em] text-ink m-0 mb-1">
               Purchase Orders
             </h1>
-            <p className="text-[13.5px] text-muted m-0">{orders.length} total orders</p>
+            <p className="text-[13.5px] text-muted m-0">{list.length} total orders</p>
           </div>
           <button
             onClick={() => setModalOpen(true)}
@@ -48,13 +38,25 @@ export const OrdersPage = ({ orders, onCreate }: OrdersPageProps) => {
         </header>
 
         <OrderSearchBar value={query} onChange={setQuery} />
-        <OrderTable orders={filtered} query={query} />
+
+        {isLoading && (
+          <div className="py-16 text-center text-muted text-[13px]" aria-busy="true">
+            Loading orders…
+          </div>
+        )}
+        {isError && (
+          <div className="py-16 text-center text-danger text-[13px]">
+            Failed to load orders. Please refresh.
+          </div>
+        )}
+        {!isLoading && !isError && (
+          <OrderTable orders={filtered} query={query} />
+        )}
       </div>
 
       <CreateOrderModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onCreate={handleCreate}
       />
     </div>
   );

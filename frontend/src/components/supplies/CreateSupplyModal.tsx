@@ -1,20 +1,21 @@
 import { Modal } from '../ui/Modal';
 import { Field } from '../ui/Field';
 import { Input } from '../ui/Input';
-import { useSupplyForm } from '../../hooks/useSupplyForm';
-import type { CreateSupplyDto } from '../../types/supply';
+import { useSupplyForm } from '@/hooks/useSupplyForm';
+import { useToast } from '@/contexts/ToastContext';
 
 type CreateSupplyModalProps = {
   open: boolean;
   onClose: () => void;
-  onCreate: (dto: CreateSupplyDto) => void;
 };
 
-export const CreateSupplyModal = ({ open, onClose, onCreate }: CreateSupplyModalProps) => {
-  const { form, errors, handleChange, handleSubmit, reset } = useSupplyForm((dto) => {
-    onCreate(dto);
-    onClose();
-  });
+export const CreateSupplyModal = ({ open, onClose }: CreateSupplyModalProps) => {
+  const { pushToast } = useToast();
+  const { form, errors, apiError, handleChange, handleSubmit, reset, isPending } =
+    useSupplyForm(() => {
+      pushToast('Supply order placed');
+      onClose();
+    });
 
   const handleClose = () => {
     reset();
@@ -30,6 +31,12 @@ export const CreateSupplyModal = ({ open, onClose, onCreate }: CreateSupplyModal
       width={520}
     >
       <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
+        {apiError && (
+          <p role="alert" className="text-[13px] text-danger">
+            {apiError}
+          </p>
+        )}
+
         <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
           <Field label="Material" htmlFor="material" required>
             <Input as="select" id="material" name="material" value={form.material} onChange={handleChange}>
@@ -72,7 +79,7 @@ export const CreateSupplyModal = ({ open, onClose, onCreate }: CreateSupplyModal
               onChange={handleChange}
             />
           </Field>
-          <Field label="ETA" htmlFor="eta">
+          <Field label="ETA" htmlFor="eta" required error={errors.eta}>
             <Input
               id="eta"
               name="eta"
@@ -87,15 +94,17 @@ export const CreateSupplyModal = ({ open, onClose, onCreate }: CreateSupplyModal
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2.5 rounded-md text-[13.5px] font-semibold bg-surface border border-base text-ink hover:bg-[var(--color-bg)] hover:border-slate-300 transition-colors"
+            disabled={isPending}
+            className="px-4 py-2.5 rounded-md text-[13.5px] font-semibold bg-surface border border-base text-ink hover:bg-[var(--color-bg)] hover:border-slate-300 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2.5 rounded-md text-[13.5px] font-semibold bg-primary text-white hover:bg-[var(--color-primary-600)] shadow-[0_1px_2px_rgba(37,99,235,0.25)] transition-colors"
+            disabled={isPending}
+            className="px-4 py-2.5 rounded-md text-[13.5px] font-semibold bg-primary text-white hover:bg-[var(--color-primary-600)] shadow-[0_1px_2px_rgba(37,99,235,0.25)] transition-colors disabled:opacity-50"
           >
-            Place Order
+            {isPending ? 'Placing...' : 'Place Order'}
           </button>
         </div>
       </form>

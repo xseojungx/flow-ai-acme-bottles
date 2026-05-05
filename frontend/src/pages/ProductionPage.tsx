@@ -1,16 +1,15 @@
 import { TopBar } from '../components/ui/TopBar';
 import { ProductionNowSection } from '../components/production/ProductionNowSection';
 import { ProductionTable } from '../components/production/ProductionTable';
-import type { Order } from '../types/order';
+import { useGetOrders } from '@/services/orders/query/useGetOrders';
 
 const SLOTS_TOTAL = 2;
 
-type ProductionPageProps = {
-  orders: Order[];
-};
+export const ProductionPage = () => {
+  const { data: orders, isLoading, isError } = useGetOrders();
 
-export const ProductionPage = ({ orders }: ProductionPageProps) => {
-  const inProd = orders.filter((o) => o.status === 'In Production');
+  const list = orders ?? [];
+  const inProd = list.filter((o) => o.status === 'In Production');
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
@@ -25,8 +24,22 @@ export const ProductionPage = ({ orders }: ProductionPageProps) => {
           </p>
         </header>
 
-        <ProductionNowSection orders={inProd} slotsTotal={SLOTS_TOTAL} />
-        <ProductionTable orders={orders} />
+        {isLoading && (
+          <div className="py-16 text-center text-muted text-[13px]" aria-busy="true">
+            Loading production data…
+          </div>
+        )}
+        {isError && (
+          <div className="py-16 text-center text-danger text-[13px]">
+            Failed to load production data. Please refresh.
+          </div>
+        )}
+        {!isLoading && !isError && (
+          <>
+            <ProductionNowSection orders={inProd} slotsTotal={SLOTS_TOTAL} />
+            <ProductionTable orders={list} />
+          </>
+        )}
       </div>
     </div>
   );
