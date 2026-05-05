@@ -20,15 +20,15 @@ export const supplyOrderRepository = {
     });
   },
 
-  findReceived() {
+  findReceived(now: Date) {
     return prisma.supplyOrder.findMany({
-      where: { expected_arrival_at: { lte: new Date() } },
+      where: { expected_arrival_at: { lte: now } },
     });
   },
 
-  findIncoming() {
+  findIncoming(now: Date) {
     return prisma.supplyOrder.findMany({
-      where: { expected_arrival_at: { gt: new Date() } },
+      where: { expected_arrival_at: { gt: now } },
       orderBy: { expected_arrival_at: "asc" },
     });
   },

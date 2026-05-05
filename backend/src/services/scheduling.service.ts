@@ -106,10 +106,12 @@ export const schedulingService = {
   async computeSchedule(): Promise<ScheduledOrder[]> {
     const now = new Date();
 
+    // Pass `now` to both repo queries so the received/incoming boundary is
+    // consistent with the `now` used throughout this scheduling run.
     const [allOrders, receivedSupplies, incomingSupplies] = await Promise.all([
       purchaseOrderRepository.findAllAsc(),
-      supplyOrderRepository.findReceived(),
-      supplyOrderRepository.findIncoming(),
+      supplyOrderRepository.findReceived(now),
+      supplyOrderRepository.findIncoming(now),
     ]);
 
     const available: MaterialMap = { PET: 0, PTA: 0, EG: 0 };
@@ -177,6 +179,10 @@ export const schedulingService = {
 
         material_ready_at = outcome.latestEta;
         fulfillment_status = "DELAYED";
+        // logic.md §6 step 7 says `available -= need` (can go negative).
+        // Clamping to 0 instead: allowing negatives inflates subsequent orders'
+        // deficits, causing them to over-consume from the incoming queue and
+        // produce incorrect ETAs.
         available.PET -= Math.min(available.PET, need.PET);
         available.PTA -= Math.min(available.PTA, need.PTA);
         available.EG -= Math.min(available.EG, need.EG);
