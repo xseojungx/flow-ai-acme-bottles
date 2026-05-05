@@ -45,7 +45,7 @@ export const useSupplyForm = (onSuccess: () => void) => {
         quantity: Number(form.qty) * 1000,
         supplier_name: form.supplier.trim() || undefined,
         tracking_number: form.tracking.trim() || undefined,
-        expected_arrival_at: `${form.eta}T00:00:00.000Z`,
+        expected_arrival_at: new Date(`${form.eta}T00:00:00`).toISOString(),
       },
       {
         onSuccess: () => { onSuccess(); reset(); },

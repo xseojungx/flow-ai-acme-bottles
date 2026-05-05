@@ -92,12 +92,12 @@ export const mapApiOrder = (api: ApiOrder): Order => {
     product: PRODUCT_MAP[productType],
     productType,
     qty: api.quantity,
-    orderDate: api.created_at.slice(0, 10),
+    orderDate: new Date(api.created_at).toLocaleDateString('en-CA'),
     expectedStart:
       api.status === 'IN_PRODUCTION'
         ? 'Started'
-        : (api.start_at?.slice(0, 10) ?? null),
-    eta: api.eta?.slice(0, 10) ?? null,
+        : (api.start_at ? new Date(api.start_at).toLocaleDateString('en-CA') : null),
+    eta: api.eta ? new Date(api.eta).toLocaleDateString('en-CA') : null,
     daysLate: api.days_late ?? null,
     fulfillmentStatus: api.fulfillment_status ?? null,
     status: ORDER_STATUS_MAP[api.status],

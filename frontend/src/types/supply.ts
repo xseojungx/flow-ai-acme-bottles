@@ -87,7 +87,7 @@ export const mapApiSupply = (api: ApiSupply): Supply => ({
   qty: api.quantity / 1000,
   supplier: api.supplier_name ?? '—',
   tracking: api.tracking_number ?? '—',
-  orderDate: api.created_at.slice(0, 10),
-  eta: api.expected_arrival_at.slice(0, 10),
+  orderDate: new Date(api.created_at).toLocaleDateString('en-CA'),
+  eta: new Date(api.expected_arrival_at).toLocaleDateString('en-CA'),
   status: SUPPLY_STATUS_MAP[api.status],
 });
