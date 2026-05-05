@@ -7,7 +7,10 @@ export const usePostSupply = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateSupplyApiDto) => postSupply(data),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLY_ORDERS] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLY_ORDERS] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SUPPLY_SUMMARY] });
+      queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PURCHASE_ORDERS] });
+    },
   });
 };

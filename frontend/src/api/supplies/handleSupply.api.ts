@@ -1,7 +1,7 @@
 import { instance } from '@/api/axiosInstance';
 import { API_DOMAINS } from '@/constants/api';
 import { mapApiSupply } from '@/types/supply';
-import type { ApiSupply, CreateSupplyApiDto, Supply } from '@/types/supply';
+import type { ApiSupply, ApiSupplySummary, CreateSupplyApiDto, Supply } from '@/types/supply';
 
 interface ListEnvelope<T> {
   message: string;
@@ -22,4 +22,11 @@ export const getSupplies = async (): Promise<Supply[]> => {
 
 export const postSupply = async (data: CreateSupplyApiDto): Promise<void> => {
   await instance.post<ItemEnvelope<ApiSupply>>(API_DOMAINS.SUPPLY_ORDERS, data);
+};
+
+export const getSupplySummary = async (): Promise<ApiSupplySummary> => {
+  const response = await instance.get<ItemEnvelope<ApiSupplySummary>>(
+    API_DOMAINS.SUPPLY_SUMMARY,
+  );
+  return response.data.data;
 };

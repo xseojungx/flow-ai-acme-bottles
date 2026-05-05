@@ -103,7 +103,45 @@ function tryConsumeIncoming(
   return { canFulfill: true, latestEta: latestEta! };
 }
 
+export type MaterialSummary = {
+  received: MaterialMap;
+  consumed: MaterialMap;
+  available: MaterialMap;
+};
+
 export const schedulingService = {
+  async computeAvailableMaterials(): Promise<MaterialSummary> {
+    const now = new Date();
+    const [receivedSupplies, allOrders] = await Promise.all([
+      supplyOrderRepository.findReceived(now),
+      purchaseOrderRepository.findAllAsc(),
+    ]);
+
+    const received: MaterialMap = { PET: 0, PTA: 0, EG: 0 };
+    for (const s of receivedSupplies) {
+      received[s.material_type] += s.quantity;
+    }
+
+    const consumed: MaterialMap = { PET: 0, PTA: 0, EG: 0 };
+    for (const o of allOrders) {
+      if (o.status !== "COMPLETED") continue;
+      const req = MATERIAL_REQ[o.product_type];
+      consumed.PET += o.quantity * req.PET;
+      consumed.PTA += o.quantity * req.PTA;
+      consumed.EG  += o.quantity * req.EG;
+    }
+
+    return {
+      received,
+      consumed,
+      available: {
+        PET: Math.max(0, received.PET - consumed.PET),
+        PTA: Math.max(0, received.PTA - consumed.PTA),
+        EG:  Math.max(0, received.EG  - consumed.EG),
+      },
+    };
+  },
+
   async computeSchedule(): Promise<ScheduledOrder[]> {
     const now = new Date();
 
@@ -139,6 +177,22 @@ export const schedulingService = {
         PTA: order.quantity * req.PTA,
         EG: order.quantity * req.EG,
       };
+
+      if (order.status === "COMPLETED") {
+        available.PET = Math.max(0, available.PET - need.PET);
+        available.PTA = Math.max(0, available.PTA - need.PTA);
+        available.EG  = Math.max(0, available.EG  - need.EG);
+        const anchor = order.completed_at ?? now;
+        result.push({
+          ...order,
+          material_ready_at: anchor,
+          start_at:          anchor,
+          eta:               anchor,
+          fulfillment_status: "ON_TIME",
+          days_late:          null,
+        });
+        continue;
+      }
 
       const coveredByAvailable =
         available.PET >= need.PET &&

@@ -128,6 +128,29 @@ List all supply orders, newest first.
 
 ---
 
+### `GET /api/supply-orders/summary`
+
+현재 수령된 재료 수량과 완료된 구매 주문이 소비한 수량, 잔여 가용 수량을 반환한다.
+
+**Response `200`**
+
+```json
+{
+  "message": "Supply summary fetched",
+  "data": {
+    "received":  { "PET": 500000, "PTA": 300000, "EG": 150000 },
+    "consumed":  { "PET": 120000, "PTA": 90000,  "EG": 40000  },
+    "available": { "PET": 380000, "PTA": 210000, "EG": 110000 }
+  }
+}
+```
+
+> 모든 수치는 그램(g) 단위.  
+> `consumed` = `expected_arrival_at ≤ NOW`인 공급 주문 기준, COMPLETED 구매 주문이 소비한 재료량.  
+> `available = received − consumed` (최소 0).
+
+---
+
 ## 4. Purchase Orders
 
 ### `POST /api/purchase-orders`

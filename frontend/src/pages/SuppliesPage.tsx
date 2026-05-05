@@ -5,11 +5,15 @@ import { SupplyStatsGrid } from '../components/supplies/SupplyStatsGrid';
 import { SupplyTable } from '../components/supplies/SupplyTable';
 import { CreateSupplyModal } from '../components/supplies/CreateSupplyModal';
 import { useGetSupplies } from '@/services/supplies/query/useGetSupplies';
+import { useGetSupplySummary } from '@/services/supplies/query/useGetSupplySummary';
 
 export const SuppliesPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
-  const { data: supplies, isLoading, isError } = useGetSupplies();
+  const { data: supplies, isLoading: suppliesLoading, isError: suppliesError } = useGetSupplies();
+  const { data: summary, isLoading: summaryLoading, isError: summaryError } = useGetSupplySummary();
 
+  const isLoading = suppliesLoading || summaryLoading;
+  const isError   = suppliesError  || summaryError;
   const list = supplies ?? [];
 
   return (
@@ -43,7 +47,7 @@ export const SuppliesPage = () => {
         )}
         {!isLoading && !isError && (
           <>
-            <SupplyStatsGrid supplies={list} />
+            <SupplyStatsGrid supplies={list} summary={summary ?? null} />
             <div className="flex-between mb-2.5">
               <div className="text-label">SUPPLY ORDERS</div>
               <div className="text-[12.5px] text-muted">{list.length} orders</div>

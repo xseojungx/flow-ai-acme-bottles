@@ -1,5 +1,11 @@
 // — API types —
 export type ApiMaterialType = 'PET' | 'PTA' | 'EG';
+
+export type ApiSupplySummary = {
+  received:  Record<ApiMaterialType, number>;
+  consumed:  Record<ApiMaterialType, number>;
+  available: Record<ApiMaterialType, number>;
+};
 export type ApiSupplyStatus = 'ORDERED' | 'RECEIVED';
 
 export interface ApiSupply {

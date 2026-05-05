@@ -29,6 +29,8 @@ export type CreateOrderApiDto = {
 export type OrderProduct = '1L Bottle' | '1G Bottle';
 export type OrderStatus = 'Pending' | 'In Production' | 'Completed' | 'Cancelled';
 
+export type FulfillmentStatus = 'ON_TIME' | 'DELAYED' | 'UNABLE_TO_FULFILL';
+
 export interface Order {
   id: string;
   po: string;
@@ -40,6 +42,7 @@ export interface Order {
   expectedStart: string | null;
   eta: string | null;
   daysLate: number | null;
+  fulfillmentStatus: FulfillmentStatus | null;
   status: OrderStatus;
   notes: string | null;
 }
@@ -96,6 +99,7 @@ export const mapApiOrder = (api: ApiOrder): Order => {
         : (api.start_at?.slice(0, 10) ?? null),
     eta: api.eta?.slice(0, 10) ?? null,
     daysLate: api.days_late ?? null,
+    fulfillmentStatus: api.fulfillment_status ?? null,
     status: ORDER_STATUS_MAP[api.status],
     notes: api.notes,
   };

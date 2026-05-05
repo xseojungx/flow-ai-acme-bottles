@@ -9,7 +9,7 @@ type ProductionCardProps = {
 
 export const ProductionCard = ({ order }: ProductionCardProps) => {
   const od = overdueDays(order.eta);
-  const isSupplyDelayed = (order.daysLate ?? 0) > 0;
+  const fs = order.fulfillmentStatus;
 
   return (
     <div className="bg-surface border border-base rounded-md p-4 px-[18px] flex gap-3.5 shadow-card hover:border-slate-300 transition-colors">
@@ -26,15 +26,22 @@ export const ProductionCard = ({ order }: ProductionCardProps) => {
         </div>
         <div className="flex items-center gap-2 mt-1.5 text-[13px]">
           <span className="text-muted">ETA:</span>
-          <span className="text-danger font-semibold">{fmtDate(order.eta, { short: true })}</span>
-          {od > 0 && (
+          <span className={fs === 'UNABLE_TO_FULFILL' ? 'text-muted' : 'text-danger font-semibold'}>
+            {fs === 'UNABLE_TO_FULFILL' ? '—' : fmtDate(order.eta, { short: true })}
+          </span>
+          {od > 0 && fs !== 'UNABLE_TO_FULFILL' && (
             <span className="bg-danger text-danger text-[11.5px] font-semibold px-2 py-0.5 rounded-full">
               {od}d overdue
             </span>
           )}
-          {od === 0 && isSupplyDelayed && (
+          {fs === 'DELAYED' && (
+            <span className="bg-warning text-warning text-[11.5px] font-semibold px-2 py-0.5 rounded-full">
+              Delay expected{order.daysLate ? ` (${order.daysLate}d)` : ''}
+            </span>
+          )}
+          {fs === 'UNABLE_TO_FULFILL' && (
             <span className="bg-danger text-danger text-[11.5px] font-semibold px-2 py-0.5 rounded-full">
-              {order.daysLate}d late
+              Unable to fulfill
             </span>
           )}
         </div>

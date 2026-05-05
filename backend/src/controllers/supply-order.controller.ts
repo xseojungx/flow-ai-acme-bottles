@@ -24,4 +24,13 @@ export const supplyOrderController = {
       next(err);
     }
   },
+
+  async getSummary(_req: Request, res: Response, next: NextFunction) {
+    try {
+      const summary = await supplyOrderService.getSummary();
+      res.json({ message: "Supply summary fetched", data: summary });
+    } catch (err) {
+      next(err);
+    }
+  },
 };

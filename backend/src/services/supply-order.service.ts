@@ -1,4 +1,5 @@
 import { supplyOrderRepository } from "../repositories/supply-order.repository";
+import { schedulingService } from "./scheduling.service";
 import type { CreateSupplyOrderInput } from "../dtos/supply-order.dto";
 
 function deriveStatus(expectedArrivalAt: Date): "RECEIVED" | "ORDERED" {
@@ -17,5 +18,9 @@ export const supplyOrderService = {
       ...order,
       status: deriveStatus(order.expected_arrival_at),
     }));
+  },
+
+  async getSummary() {
+    return schedulingService.computeAvailableMaterials();
   },
 };

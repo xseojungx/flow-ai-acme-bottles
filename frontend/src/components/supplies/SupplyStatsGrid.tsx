@@ -1,30 +1,35 @@
-import { MATERIALS, type Supply } from '../../types/supply';
+import { MATERIALS, type Supply, type ApiSupplySummary, type ApiMaterialType } from '../../types/supply';
 import { SupplyStatCard } from './SupplyStatCard';
+
+const MATERIAL_TO_API: Record<string, ApiMaterialType> = {
+  'PET Resin': 'PET',
+  'PTA': 'PTA',
+  'EG': 'EG',
+};
 
 type SupplyStatsGridProps = {
   supplies: Supply[];
+  summary: ApiSupplySummary | null;
 };
 
-export const SupplyStatsGrid = ({ supplies }: SupplyStatsGridProps) => {
-  const stats = MATERIALS.map((material) => {
-    const rows = supplies.filter((s) => s.material === material);
-    const received = rows
-      .filter((s) => s.status === 'Received')
-      .reduce((sum, s) => sum + s.qty, 0);
-    const inTransit = rows.filter((s) => s.status === 'Ordered').length;
-    return { material, received, inTransit };
-  });
-
-  return (
-    <div className="grid grid-cols-3 gap-3.5 mb-6 max-md:grid-cols-1">
-      {stats.map((s) => (
+export const SupplyStatsGrid = ({ supplies, summary }: SupplyStatsGridProps) => (
+  <div className="grid grid-cols-3 gap-3.5 mb-6 max-md:grid-cols-1">
+    {MATERIALS.map((material) => {
+      const apiKey = MATERIAL_TO_API[material];
+      const inTransit = supplies.filter(
+        (s) => s.material === material && s.status === 'Ordered',
+      ).length;
+      const availableKg = summary ? summary.available[apiKey] / 1000 : 0;
+      const receivedKg  = summary ? summary.received[apiKey]  / 1000 : 0;
+      return (
         <SupplyStatCard
-          key={s.material}
-          material={s.material}
-          received={s.received}
-          inTransit={s.inTransit}
+          key={material}
+          material={material}
+          availableKg={availableKg}
+          receivedKg={receivedKg}
+          inTransit={inTransit}
         />
-      ))}
-    </div>
-  );
-};
+      );
+    })}
+  </div>
+);

@@ -31,8 +31,10 @@ export const ProductionTable = ({ orders }: ProductionTableProps) => (
           {orders.map((o, i) => {
             const od = overdueDays(o.eta);
             const isOverdue = od > 0 && o.status === 'In Production';
-            const isSupplyDelayed = (o.daysLate ?? 0) > 0;
-            const etaHighlight = isOverdue || isSupplyDelayed;
+            const fs = o.fulfillmentStatus;
+            const isSupplyDelayed = fs === 'DELAYED';
+            const isUnfulfillable = fs === 'UNABLE_TO_FULFILL';
+            const etaHighlight = isOverdue || isSupplyDelayed || isUnfulfillable;
             return (
               <tr key={o.id} className="border-b border-soft last:border-0 hover:bg-slate-50/60">
                 <td className="px-4 py-3.5 text-muted">{i + 1}</td>
@@ -55,14 +57,18 @@ export const ProductionTable = ({ orders }: ProductionTableProps) => (
                   )}
                 </td>
                 <td className="px-4 py-3.5">
-                  {o.eta ? (
+                  {isUnfulfillable ? (
+                    <span className="text-danger font-semibold">
+                      Unable to fulfill
+                    </span>
+                  ) : o.eta ? (
                     <span className={etaHighlight ? 'text-danger font-semibold' : 'text-muted'}>
                       {fmtDate(o.eta, { short: true })}
                       {isOverdue && (
                         <span className="font-medium text-xs"> ({od}d late)</span>
                       )}
                       {!isOverdue && isSupplyDelayed && (
-                        <span className="font-medium text-xs"> ({o.daysLate}d late)</span>
+                        <span className="font-medium text-xs"> (Delay expected{o.daysLate ? `, ${o.daysLate}d` : ''})</span>
                       )}
                     </span>
                   ) : (
