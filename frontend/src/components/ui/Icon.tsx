@@ -55,4 +55,23 @@ const Search = ({ width = 16, height = 16, className }: IconProps) => (
   </svg>
 );
 
-export const Icon = { Plus, Box, Search };
+const Factory = ({ width = 16, height = 16, className }: IconProps) => (
+  <svg
+    width={width}
+    height={height}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M2 20h20" />
+    <path d="M4 20V9l6-4v4l6-4v4l4-3v14" />
+    <rect x="8" y="14" width="3" height="6" />
+    <rect x="13" y="14" width="3" height="6" />
+  </svg>
+);
+
+export const Icon = { Plus, Box, Search, Factory };

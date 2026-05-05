@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
 import { OrdersPage } from './pages/OrdersPage';
+import { ProductionPage } from './pages/ProductionPage';
 import { SuppliesPage } from './pages/SuppliesPage';
 
 export const App = () => (
@@ -14,6 +15,7 @@ export const App = () => (
         path="/supplies"
         element={<SuppliesPage supplies={[]} onCreate={() => {}} pushToast={() => {}} />}
       />
+      <Route path="/production" element={<ProductionPage orders={[]} />} />
     </Routes>
   </BrowserRouter>
 );
