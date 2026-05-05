@@ -5,7 +5,7 @@ type SupplyStatsGridProps = {
   supplies: Supply[];
 };
 
-export function SupplyStatsGrid({ supplies }: SupplyStatsGridProps) {
+export const SupplyStatsGrid = ({ supplies }: SupplyStatsGridProps) => {
   const stats = MATERIALS.map((material) => {
     const rows = supplies.filter((s) => s.material === material);
     const received = rows
@@ -27,4 +27,4 @@ export function SupplyStatsGrid({ supplies }: SupplyStatsGridProps) {
       ))}
     </div>
   );
-}
+};

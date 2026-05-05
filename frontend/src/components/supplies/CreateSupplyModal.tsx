@@ -10,16 +10,16 @@ type CreateSupplyModalProps = {
   onCreate: (dto: CreateSupplyDto) => void;
 };
 
-export function CreateSupplyModal({ open, onClose, onCreate }: CreateSupplyModalProps) {
+export const CreateSupplyModal = ({ open, onClose, onCreate }: CreateSupplyModalProps) => {
   const { form, errors, handleChange, handleSubmit, reset } = useSupplyForm((dto) => {
     onCreate(dto);
     onClose();
   });
 
-  function handleClose() {
+  const handleClose = () => {
     reset();
     onClose();
-  }
+  };
 
   return (
     <Modal
@@ -101,4 +101,4 @@ export function CreateSupplyModal({ open, onClose, onCreate }: CreateSupplyModal
       </form>
     </Modal>
   );
-}
+};

@@ -12,7 +12,7 @@ type NativeInputProps = {
 
 type InputProps = SelectInputProps | NativeInputProps;
 
-export function Input(props: InputProps) {
+export const Input = (props: InputProps) => {
   if (props.as === 'select') {
     const { as: _as, children, ...rest } = props;
     return (
@@ -23,4 +23,4 @@ export function Input(props: InputProps) {
   }
   const { as: _as, ...rest } = props;
   return <input className={BASE} {...rest} />;
-}
+};

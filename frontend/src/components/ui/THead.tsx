@@ -3,19 +3,17 @@ type THeadProps = {
   numCols?: number[]; // indices of right-aligned (numeric) columns
 };
 
-export function THead({ cols, numCols = [] }: THeadProps) {
-  return (
-    <thead>
-      <tr className="border-b border-base">
-        {cols.map((col, i) => (
-          <th
-            key={col}
-            className={`px-4 py-3 text-label whitespace-nowrap ${numCols.includes(i) ? 'text-right' : 'text-left'}`}
-          >
-            {col}
-          </th>
-        ))}
-      </tr>
-    </thead>
-  );
-}
+export const THead = ({ cols, numCols = [] }: THeadProps) => (
+  <thead>
+    <tr className="border-b border-base">
+      {cols.map((col, i) => (
+        <th
+          key={col}
+          className={`px-4 py-3 text-label whitespace-nowrap ${numCols.includes(i) ? 'text-right' : 'text-left'}`}
+        >
+          {col}
+        </th>
+      ))}
+    </tr>
+  </thead>
+);

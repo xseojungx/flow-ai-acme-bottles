@@ -9,12 +9,10 @@ const STATUS_STYLES: Record<SupplyStatus, string> = {
   Ordered: 'bg-warning text-warning',
 };
 
-export function StatusBadge({ status }: StatusBadgeProps) {
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-semibold ${STATUS_STYLES[status]}`}
-    >
-      {status}
-    </span>
-  );
-}
+export const StatusBadge = ({ status }: StatusBadgeProps) => (
+  <span
+    className={`inline-flex items-center px-2 py-0.5 rounded-sm text-xs font-semibold ${STATUS_STYLES[status]}`}
+  >
+    {status}
+  </span>
+);

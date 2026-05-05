@@ -9,10 +9,10 @@ type ModalProps = {
   children: React.ReactNode;
 };
 
-export function Modal({ open, onClose, title, subtitle, width = 480, children }: ModalProps) {
+export const Modal = ({ open, onClose, title, subtitle, width = 480, children }: ModalProps) => {
   const ref = useRef<HTMLDialogElement>(null);
 
-  // Sync open state with the native dialog element
+  // Sync React open state with the native dialog element
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -40,4 +40,4 @@ export function Modal({ open, onClose, title, subtitle, width = 480, children }:
       {children}
     </dialog>
   );
-}
+};

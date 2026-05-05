@@ -9,22 +9,22 @@ const INITIAL_STATE: SupplyFormState = {
   eta: '',
 };
 
-export function useSupplyForm(onSuccess: (dto: CreateSupplyDto) => void) {
+export const useSupplyForm = (onSuccess: (dto: CreateSupplyDto) => void) => {
   const [form, setForm] = useState<SupplyFormState>(INITIAL_STATE);
   const [errors, setErrors] = useState<SupplyFormErrors>({});
 
-  function handleChange(
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
-  ) {
+  ) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  }
+  };
 
-  function reset() {
+  const reset = () => {
     setForm(INITIAL_STATE);
     setErrors({});
-  }
+  };
 
-  function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const errs: SupplyFormErrors = {};
     if (!form.qty || Number(form.qty) <= 0) errs.qty = 'Enter a positive number';
@@ -41,7 +41,7 @@ export function useSupplyForm(onSuccess: (dto: CreateSupplyDto) => void) {
       status: 'Ordered',
     });
     reset();
-  }
+  };
 
   return { form, errors, handleChange, handleSubmit, reset };
-}
+};

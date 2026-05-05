@@ -12,13 +12,13 @@ type SuppliesPageProps = {
   pushToast: (message: string) => void;
 };
 
-export function SuppliesPage({ supplies, onCreate, pushToast }: SuppliesPageProps) {
+export const SuppliesPage = ({ supplies, onCreate, pushToast }: SuppliesPageProps) => {
   const [modalOpen, setModalOpen] = useState(false);
 
-  function handleCreate(dto: CreateSupplyDto) {
+  const handleCreate = (dto: CreateSupplyDto) => {
     onCreate(dto);
     pushToast('Supply order placed');
-  }
+  };
 
   return (
     <div className="flex flex-col flex-1 min-w-0">
@@ -56,4 +56,4 @@ export function SuppliesPage({ supplies, onCreate, pushToast }: SuppliesPageProp
       />
     </div>
   );
-}
+};
