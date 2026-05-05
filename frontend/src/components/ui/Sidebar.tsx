@@ -68,13 +68,15 @@ export const Sidebar = () => {
       <div className="mt-auto pt-3.5 border-t border-white/[0.06]">
         <div className="flex items-center gap-2.5 px-1.5 py-2">
           <div className="w-8 h-8 rounded-full flex-center text-white text-xs font-semibold bg-gradient-to-br from-blue-500 to-blue-700 shrink-0">
-            JM
+            SJ
           </div>
           <div>
             <div className="text-[12.5px] font-semibold text-slate-200">
-              Jordan Miles
+              SeoJung Han
             </div>
-            <div className="text-[11px] text-slate-500">Plant Supervisor</div>
+            <div className="text-[11px] text-slate-500">
+              Forward Deploy Engineer
+            </div>
           </div>
         </div>
       </div>
