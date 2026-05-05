@@ -1,5 +1,22 @@
-function App() {
-  return <>hi</>;
-}
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router';
+import { SuppliesPage } from './pages/SuppliesPage';
 
-export default App;
+export function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Navigate to="/supplies" replace />} />
+        <Route
+          path="/supplies"
+          element={
+            <SuppliesPage
+              supplies={[]}
+              onCreate={() => {}}
+              pushToast={() => {}}
+            />
+          }
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}

@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+/* =========================
+   Design Tokens → Tailwind Theme
+   ========================= */
+@theme {
+  /* colors — surfaces */
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-sidebar: #0b1220;
+  --color-sidebar-2: #0f172a;
+  --color-border: #e2e8f0;
+  --color-border-2: #eef2f6;
+
+  /* text */
+  --color-ink: #0f172a;
+  --color-ink-2: #334155;
+  --color-muted: #64748b;
+  --color-dim: #94a3b8;
+
+  /* brand */
+  --color-primary: #2563eb;
+  --color-primary-600: #1d4ed8;
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+
+  /* status */
+  --color-success: #16a34a;
+  --color-success-bg: #dcfce7;
+
+  --color-warning: #d97706;
+  --color-warning-bg: #fef3c7;
+
+  --color-orange: #ea580c;
+  --color-orange-bg: #ffedd5;
+
+  --color-danger: #dc2626;
+  --color-danger-bg: #fee2e2;
+
+  /* radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  /* shadow */
+  --shadow-card:
+    0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+
+  --shadow-pop:
+    0 10px 25px -5px rgba(15, 23, 42, 0.18),
+    0 8px 10px -6px rgba(15, 23, 42, 0.1);
+
+  /* typography */
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+
+/* =========================
+   Base Layer (reset + typography)
+   ========================= */
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-[var(--color-bg)] text-[var(--color-ink)] font-sans text-sm;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button {
+    @apply cursor-pointer border-0 bg-transparent font-inherit;
+  }
+
+  input,
+  select,
+  textarea {
+    @apply font-inherit text-sm text-[var(--color-ink)];
+  }
+}
+
+/* =========================
+   Reusable Utility Extensions
+   ========================= */
+@layer utilities {
+  /* surfaces */
+  .bg-surface {
+    background: var(--color-surface);
+  }
+  .bg-sidebar {
+    background: var(--color-sidebar);
+  }
+
+  /* text */
+  .text-ink {
+    color: var(--color-ink);
+  }
+  .text-ink-2 {
+    color: var(--color-ink-2);
+  }
+  .text-muted {
+    color: var(--color-muted);
+  }
+  .text-dim {
+    color: var(--color-dim);
+  }
+
+  /* borders */
+  .border-base {
+    border-color: var(--color-border);
+  }
+  .border-soft {
+    border-color: var(--color-border-2);
+  }
+
+  /* brand */
+  .bg-primary {
+    background: var(--color-primary);
+  }
+  .bg-primary-soft {
+    background: var(--color-primary-50);
+  }
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  /* status */
+  .bg-success {
+    background: var(--color-success-bg);
+  }
+  .text-success {
+    color: var(--color-success);
+  }
+
+  .bg-warning {
+    background: var(--color-warning-bg);
+  }
+  .text-warning {
+    color: var(--color-warning);
+  }
+
+  .bg-danger {
+    background: var(--color-danger-bg);
+  }
+  .text-danger {
+    color: var(--color-danger);
+  }
+
+  /* radius */
+  .rounded-sm {
+    border-radius: var(--radius-sm);
+  }
+  .rounded-md {
+    border-radius: var(--radius-md);
+  }
+  .rounded-lg {
+    border-radius: var(--radius-lg);
+  }
+
+  /* shadow */
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-pop {
+    box-shadow: var(--shadow-pop);
+  }
+
+  /* layout helpers */
+  .flex-center {
+    @apply flex items-center justify-center;
+  }
+
+  .flex-between {
+    @apply flex items-center justify-between;
+  }
+
+  /* typography helpers */
+  .text-label {
+    @apply text-[11px] font-bold tracking-wider text-[var(--color-ink-2)];
+  }
+
+  .text-body {
+    @apply text-sm text-[var(--color-ink-2)];
+  }
+
+  .text-title {
+    @apply text-xl font-bold tracking-tight text-[var(--color-ink)];
+  }
+}
