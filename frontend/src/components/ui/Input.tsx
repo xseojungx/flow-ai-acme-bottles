@@ -6,11 +6,15 @@ type SelectInputProps = {
   children: React.ReactNode;
 } & React.SelectHTMLAttributes<HTMLSelectElement>;
 
+type TextareaInputProps = {
+  as: 'textarea';
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
+
 type NativeInputProps = {
   as?: undefined;
 } & React.InputHTMLAttributes<HTMLInputElement>;
 
-type InputProps = SelectInputProps | NativeInputProps;
+type InputProps = SelectInputProps | TextareaInputProps | NativeInputProps;
 
 export const Input = (props: InputProps) => {
   if (props.as === 'select') {
@@ -20,6 +24,10 @@ export const Input = (props: InputProps) => {
         {children}
       </select>
     );
+  }
+  if (props.as === 'textarea') {
+    const { as: _as, ...rest } = props;
+    return <textarea className={`${BASE} resize-y min-h-[72px]`} {...rest} />;
   }
   const { as: _as, ...rest } = props;
   return <input className={BASE} {...rest} />;

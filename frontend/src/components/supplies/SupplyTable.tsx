@@ -1,6 +1,6 @@
 import { TableWrap } from '../ui/TableWrap';
 import { THead } from '../ui/THead';
-import { StatusBadge } from '../ui/StatusBadge';
+import { SupplyStatusBadge } from '../ui/StatusBadge';
 import type { Supply } from '../../types/supply';
 
 type SupplyTableProps = {
@@ -37,7 +37,7 @@ export const SupplyTable = ({ supplies }: SupplyTableProps) => (
               {s.eta ?? <span className="text-dim">—</span>}
             </td>
             <td className="px-4 py-3.5">
-              <StatusBadge status={s.status} />
+              <SupplyStatusBadge status={s.status} />
             </td>
           </tr>
         ))}
